@@ -1,5 +1,6 @@
+import asyncio
 import json
-import asyncio_redis
+import aioredis
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
 from config import REDIS_HOST, REDIS_PORT, HOST, PORT
@@ -8,8 +9,8 @@ from models import DatabaseHandlerModel, ConvertHandlerModel
 
 class ConvertHandler(PydanticView):
     async def get(self, conversion: ConvertHandlerModel):
-        redis = await asyncio_redis.Connection.create(host=REDIS_HOST, port=REDIS_PORT)
-        conversions = await redis.get(conversion.from_)
+        db = self.request.app.get('db')
+        conversions = await db.execute_command('get', conversion.from_)
 
         if not conversions:
             return web.json_response({'error': 'FROM currency not found'}, status=400)
@@ -25,14 +26,21 @@ class ConvertHandler(PydanticView):
 
 
 class DatabaseHandler(PydanticView):
-    async def post(self, article: DatabaseHandlerModel):
-        print(article)
+    async def post(self, params: DatabaseHandlerModel):
+        print(params)
         return web.json_response({'name': 'good'})
 
 
-app = web.Application()
-app.router.add_view('/convert', ConvertHandler)
-app.router.add_view('/database', DatabaseHandler)
+async def init_app():
+    app = web.Application()
+    redis = await aioredis.from_url(f"redis://{REDIS_HOST}:{REDIS_PORT}", encoding="utf-8", decode_responses=True)
+    app['db'] = redis
+    app.router.add_view('/convert', ConvertHandler)
+    app.router.add_view('/database', DatabaseHandler)
+    return app
+
 
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    app = loop.run_until_complete(init_app())
     web.run_app(app, host=HOST, port=PORT)

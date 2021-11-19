@@ -5,7 +5,7 @@ from pydantic import Field, BaseModel
 class ConvertHandlerModel(Group):
     from_: str = Field(alias='from')
     to: str
-    amount: float
+    amount: float = Field(ge=0)
 
 
 class DatabaseHandlerModel(BaseModel):
