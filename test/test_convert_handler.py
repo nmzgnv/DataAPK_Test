@@ -46,10 +46,10 @@ class ConvertHandlerTest(AioHTTPTestCase):
         await self.case_test("?from=None&to=USD&amount=1", 400, {"error": "FROM currency not found"})
 
     async def test_convert_invalid_to_currency(self):
-        await self.case_test("?from=RUB&to=None&amount=1", 400, {"error": "TO currency not found"})
+        await self.case_test("?from=TEST_RUB&to=None&amount=1", 400, {"error": "TO currency not found"})
 
     async def test_convert_when_amount_lower_0(self):
-        await self.case_test("?from=RUB&to=USD&amount=-10", 400, [{
+        await self.case_test("?from=TEST_RUB&to=USD&amount=-10", 400, [{
             "loc": [
                 "amount"
             ],
