@@ -10,6 +10,11 @@ async def init_app():
     app = web.Application()
     redis = await aioredis.from_url(REDIS_URL, encoding="utf-8", decode_responses=True)
     app['db'] = redis
+
+    async def redis_disconnect(app):
+        await redis.connection_pool.disconnect()
+
+    app.on_shutdown.append(redis_disconnect)
     app.router.add_view('/convert', ConvertHandler)
     app.router.add_view('/database', DatabaseHandler)
     return app

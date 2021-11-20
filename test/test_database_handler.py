@@ -17,11 +17,6 @@ class ConvertHandlerTest(AioHTTPTestCase):
 
         return app
 
-    async def tearDownAsync(self):
-        await self.db.connection_pool.disconnect()
-        await self.app.shutdown()
-        await super().tearDownAsync()
-
     async def case_test(self, request_body, expected_status, expected_answer):
         async with self.client.post('/database', json=request_body) as resp:
             self.assertEqual(expected_answer, await resp.json())
