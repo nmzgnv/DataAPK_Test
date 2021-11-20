@@ -1,5 +1,6 @@
-REDIS_HOST = '127.0.0.1'
-REDIS_PORT = 6379
+import os
 
-HOST = '127.0.0.1'
-PORT = 8000
+REDIS_URL = f"redis://127.0.0.1:6379"
+
+HOST = os.getenv('HOST', '127.0.0.1')
+PORT = int(os.getenv('PORT', 8000))

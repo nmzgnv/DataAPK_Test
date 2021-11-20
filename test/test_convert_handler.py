@@ -6,7 +6,13 @@ from main import init_app
 class ConvertHandlerTest(AioHTTPTestCase):
     async def get_application(self):
         app = await init_app()
+        self.db = app['db']
         return app
+
+    async def tearDownAsync(self):
+        await self.db.connection_pool.disconnect()
+        await self.app.shutdown()
+        await super().tearDownAsync()
 
     async def case_test(self, params_url, expected_status, expected_answer):
         async with self.client.request("GET", "/convert" + params_url) as resp:
